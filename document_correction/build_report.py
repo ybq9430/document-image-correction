@@ -109,6 +109,10 @@ def add_heading_chapter(text):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(18)
     p.paragraph_format.space_after = Pt(12)
+    # Outline level 0 for TOC
+    pPr = p._p.get_or_add_pPr()
+    outline = parse_xml(f'<w:outlineLvl {nsdecls("w")} w:val="0"/>')
+    pPr.append(outline)
     run = p.add_run(text)
     run.bold = True
     run.font.size = Pt(16)
@@ -121,6 +125,10 @@ def add_heading_section(text):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(12)
     p.paragraph_format.space_after = Pt(6)
+    # Outline level 1 for TOC
+    pPr = p._p.get_or_add_pPr()
+    outline = parse_xml(f'<w:outlineLvl {nsdecls("w")} w:val="1"/>')
+    pPr.append(outline)
     run = p.add_run(text)
     run.bold = True
     run.font.size = Pt(13)
@@ -133,6 +141,10 @@ def add_heading_subsection(text):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(8)
     p.paragraph_format.space_after = Pt(4)
+    # Outline level 2 for TOC
+    pPr = p._p.get_or_add_pPr()
+    outline = parse_xml(f'<w:outlineLvl {nsdecls("w")} w:val="2"/>')
+    pPr.append(outline)
     run = p.add_run(text)
     run.bold = True
     run.font.size = Pt(11)
@@ -278,6 +290,118 @@ run.font.size = Pt(13)
 run.font.name = 'Malgun Gothic'
 run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
 
+doc.add_paragraph()
+
+p = doc.add_paragraph()
+p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+run = p.add_run("GitHub: https://github.com/ybq9430/document-image-correction")
+run.font.size = Pt(10)
+run.font.name = 'Malgun Gothic'
+run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
+
+add_page_break()
+
+# ══════════════════════════════════════════════════════════════
+# 목차 (Table of Contents)
+# ══════════════════════════════════════════════════════════════
+
+p = doc.add_paragraph()
+p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p.paragraph_format.space_after = Pt(18)
+run = p.add_run("목 차")
+run.bold = True
+run.font.size = Pt(18)
+run.font.name = 'Malgun Gothic'
+run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
+
+# Insert TOC field — right-click → Update Field in Word
+toc_p = doc.add_paragraph()
+run_begin = toc_p.add_run()
+run_begin._r.append(parse_xml(f'<w:fldChar {nsdecls("w")} w:fldCharType="begin"/>'))
+run_instr = toc_p.add_run()
+run_instr._r.append(parse_xml(f'<w:instrText {nsdecls("w")} xml:space="preserve"> TOC \\o "1-3" \\h \\z </w:instrText>'))
+run_sep = toc_p.add_run()
+run_sep._r.append(parse_xml(f'<w:fldChar {nsdecls("w")} w:fldCharType="separate"/>'))
+run_text = toc_p.add_run("[ 목차를 생성하려면 여기를 우클릭 → 필드 업데이트(F) / Right-click → Update Field ]")
+run_text.font.size = Pt(9)
+run_text.font.color.rgb = RGBColor(128, 128, 128)
+run_text.font.name = 'Malgun Gothic'
+run_text._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
+run_end = toc_p.add_run()
+run_end._r.append(parse_xml(f'<w:fldChar {nsdecls("w")} w:fldCharType="end"/>'))
+
+add_page_break()
+
+# ══════════════════════════════════════════════════════════════
+# 그림 목차 (List of Figures)
+# ══════════════════════════════════════════════════════════════
+
+p = doc.add_paragraph()
+p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p.paragraph_format.space_after = Pt(12)
+run = p.add_run("그 림 목 차")
+run.bold = True
+run.font.size = Pt(18)
+run.font.name = 'Malgun Gothic'
+run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
+
+figures = [
+    ("그림 1.", "전체 처리 파이프라인 흐름도"),
+    ("그림 2.", "파이프라인 단계별 중간 결과 예시 (7단계)"),
+    ("그림 3.", "Canny 에지 검출 및 Dilation 효과"),
+    ("그림 4.", "Canny + Dilation ROI 확대 비교"),
+    ("그림 5.", "CLAHE 적용 전후 히스토그램 및 이미지 비교"),
+    ("그림 6.", "검출 전략 분포 및 이미지별 전략 사용 현황"),
+    ("그림 7.", "파이프라인 단계별 처리 시간 누적 막대 그래프"),
+    ("그림 8.", "전체 6장 테스트 이미지의 원본/교정/향상 3단 비교 그리드"),
+    ("그림 9.", "파라미터 민감도 히트맵"),
+]
+for num, title in figures:
+    p = doc.add_paragraph()
+    p.paragraph_format.space_after = Pt(2)
+    p.paragraph_format.left_indent = Cm(1.5)
+    run = p.add_run(f"{num}  {title}")
+    run.font.size = Pt(10)
+    run.font.name = 'Malgun Gothic'
+    run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
+
+add_page_break()
+
+# ══════════════════════════════════════════════════════════════
+# 표 목차 (List of Tables)
+# ══════════════════════════════════════════════════════════════
+
+p = doc.add_paragraph()
+p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p.paragraph_format.space_after = Pt(12)
+run = p.add_run("표 목 차")
+run.bold = True
+run.font.size = Pt(18)
+run.font.name = 'Malgun Gothic'
+run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
+
+tables = [
+    ("표 1.", "개발 환경 및 제약 조건"),
+    ("표 2.", "프로젝트 수행 일정"),
+    ("표 3.", "실험 데이터 개요"),
+    ("표 4.", "평가 지표 체계"),
+    ("표 5.", "시스템 파라미터 기본값"),
+    ("표 6.", "문서 교정 실험 결과 (Google Colab CPU 환경)"),
+    ("표 7.", "Experiment 1: Canny Low Threshold"),
+    ("표 8.", "Experiment 2: Canny High Threshold"),
+    ("표 9.", "Experiment 3: Gaussian Kernel Size"),
+    ("표 10.", "Experiment 4: CLAHE clipLimit"),
+    ("표 11.", "종합 파라미터 권장값"),
+]
+for num, title in tables:
+    p = doc.add_paragraph()
+    p.paragraph_format.space_after = Pt(2)
+    p.paragraph_format.left_indent = Cm(1.5)
+    run = p.add_run(f"{num}  {title}")
+    run.font.size = Pt(10)
+    run.font.name = 'Malgun Gothic'
+    run._element.rPr.rFonts.set(qn('w:eastAsia'), 'Malgun Gothic')
+
 add_page_break()
 
 # ══════════════════════════════════════════════════════════════
@@ -324,6 +448,7 @@ make_table(
         ["개발 환경", "Google Colab (CPU 런타임)"],
         ["ML/DL 사용", "금지 (torch, tensorflow, keras, sklearn 등 불가)"],
         ["허용 기법", "전통적 Computer Vision + Image Processing만 사용"],
+        ["소스코드", "https://github.com/ybq9430/document-image-correction"],
     ],
     col_widths=[2.5, 4.0],
 )
